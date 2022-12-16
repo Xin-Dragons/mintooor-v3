@@ -1,9 +1,49 @@
+  @font-face {
+      font-family: "Futura";
+      font-weight: normal;
+      font-style: normal;
+      src: url("/futura.woff") format("woff");
+    }
+
+    @font-face {
+      font-family: "Regards";
+      font-weight: normal;
+      font-style: normal;
+      src: url("/Regards.woff") format("woff");
+    }
+
+    @font-face {
+      font-family: "Futura";
+      font-weight: normal;
+      font-style: normal;
+      src: url("/futura.woff2") format("woff2");
+    }
+
+    @font-face {
+      font-family: "Plakaat";
+      font-weight: normal;
+      font-style: normal;
+      src: url("/Plakkaat.woff") format("woff");
+    }
+
+    /** Fractul SemiBold */
+    @font-face {
+      font-family: "Plakaat";
+      font-weight: normal;
+      font-style: normal;
+      src: url("/Plakkaat.woff2") format("woff2");
+    }
+
 html,
 body {
+
+  background: url('/bg.jpg');
+  background-size: cover !important;
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: "Futura",Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif !important;
+    color:#fff;
 }
 
 a {
@@ -14,3 +54,42 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.MuiCard-root {    
+  background-color: #04033063 !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    border-radius: 35px !important;
+    box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%), 0px 1px 1px 0px rgb(0 0 0 / 14%), 0px 1px 3px 0px rgb(0 0 0 / 12%);
+    overflow: hidden;
+    color: #fff !important;}
+
+    .MuiTabs-flexContainer {font-family: "Futura",Segoe UI, Roboto, Oxygen;font-weight: 700 !important;border-radius: 35px !important;}
+
+    .MuiTypography-root {font-family: "Futura",Segoe UI, Roboto, Oxygen;font-weight: 700 !important;letter-spacing: 0px !important;}
+    h1.MuiTypography-root {    font-size: 70px !important;}
+
+.wallet-adapter-dropdown {position: absolute !important;top: 80px;
+    left: calc(50vw + 400px);}
+
+    .wallet-adapter-button-trigger {
+    background-color: #ff92be !important;
+    color:#04017d !important
+}
+.MuiLinearProgress-bar {background: #ff92be !important;border-radius: 25px !important;}
+.MuiLinearProgress-root {background-color: #b34571 !important;height: 25px;
+  border-radius: 33px;}
+
+  .MuiTab-root {color:#ff92be !important;font-weight: 800 !important;}
+  .MuiTabs-indicator {background-color: #b34571 !important;}
+  .Mui-selected {color:#ffd6e7 !important}
+  .xlabs {padding-top: 50px !important;}
+  MuiButtonBase-root-MuiButton-root.Mui-disabled {
+    color: rgba(255, 255, 255, 0.26);
+    box-shadow: none;
+    background-color: #b3457133;}
+  .MuiButton-root {background-color: #ff92be; color:#04017d;font-weight: 800 !important;}
+
+  .MuiTypography-h3 {font-family: "Regards" !important;}
+
