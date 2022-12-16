@@ -85,11 +85,13 @@ a {
   .MuiTabs-indicator {background-color: #b34571 !important;}
   .Mui-selected {color:#ffd6e7 !important}
   .xlabs {padding-top: 50px !important;}
-  MuiButtonBase-root-MuiButton-root.Mui-disabled {
-    color: rgba(255, 255, 255, 0.26);
+
+  .MuiButton-contained {background-color: #ff92be !important; color:#04017d !important;font-weight: 800 !important;}
+
+  .MuiButton-contained.Mui-disabled {
+    color: rgba(255, 255, 255, 0.26) !important;
     box-shadow: none;
-    background-color: #b3457133;}
-  .MuiButton-root {background-color: #ff92be; color:#04017d;font-weight: 800 !important;}
+    background-color: #b3457133 !important;}
 
   .MuiTypography-h3 {font-family: "Regards" !important;}
 
