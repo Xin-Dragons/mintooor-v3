@@ -632,8 +632,8 @@ export const MintNFTs = () => {
                 !!(groupsWithEligibility.length) && (
                   <Tabs value={activeGroup?.label} orientation="vertical">
                     {
-                      groupsWithEligibility.map(item => {
-                        return <Tab value={item.label} onClick={() => setActiveGroup(item)} label={item.label} />
+                      groupsWithEligibility.map((item, index) => {
+                        return <Tab key={index} value={item.label} onClick={() => setActiveGroup(item)} label={item.label} />
                       })
                     }
                   </Tabs>
