@@ -602,7 +602,7 @@ export const MintNFTs = () => {
     <Container>
       <Toaster />
       <Stack spacing={2}>
-        <Typography variant="h1">Shkary Scenes Mint</Typography>
+        <Typography variant="h1"><img src="/ss.svg"/></Typography>
         <Card>
           <CardContent>
             <Stack direction="row" spacing={5}>
@@ -649,7 +649,7 @@ export const MintNFTs = () => {
             </Modal>
           </CardContent>
         </Card>
-        <Typography variant="h4">Mintooor V3</Typography>
+        <Typography variant="h4"><a href="https://www.xlabs.so/"><img src="/xlaunchpad.png" alt="XLaunchpad logo" className="xlabs"/></a></Typography>
       </Stack>
     </Container>
   );
