@@ -648,6 +648,9 @@ export const MintNFTs = () => {
                   {minting && <CircularProgress />}
                 </Button>
                 {
+                  status && <Typography variant="h3">{status}</Typography>
+                }
+                {
                   candyMachine && <MintProgress candyMachine={candyMachine} />
                 }
                 {
