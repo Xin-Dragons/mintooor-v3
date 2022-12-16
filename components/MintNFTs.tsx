@@ -566,7 +566,7 @@ export const MintNFTs = () => {
               return <b>Failed: User rejected the request</b>
             }
 
-            return <b>Failed: {err.message}</b>
+            return <b>Failed: {e.message}</b>
           }
         })
   
