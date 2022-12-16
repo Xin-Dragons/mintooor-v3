@@ -175,7 +175,7 @@ export const MintNFTs = () => {
   useEffect(() => {
     const id = setInterval(() => {
       refreshCandyMachine()
-    }, 2000)
+    }, 5000)
     return () => {
       clearInterval(id);
     }
@@ -456,7 +456,7 @@ export const MintNFTs = () => {
         try {
           const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.guards.tokenPayment.mint, owner: metaplex.identity().publicKey });
           const balance = await metaplex.connection.getTokenAccountBalance(ata);
-          if (balance < item.guards.tokenPayment.amount.basisPoints.toNumber()) {
+          if (Number(balance.value.amount) < item.guards.tokenPayment.amount.basisPoints.toNumber()) {
             return {
               ...item,
               status: 'Insufficient balance',
@@ -475,7 +475,7 @@ export const MintNFTs = () => {
           try {
             const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.freezeTokenPayment.mint, owner: metaplex.identity().publicKey });
             const balance = await metaplex.connection.getTokenAccountBalance(ata);
-            if (balance < item.guards.freezeTokenPayment.amount.basisPoints.toNumber()) {
+            if (Number(balance.value.amount) < item.guards.freezeTokenPayment.amount.basisPoints.toNumber()) {
               return {
                 ...item,
                 status: 'Insufficient balance',
