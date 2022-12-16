@@ -54,11 +54,11 @@ function ActiveGroup({ activeGroup }) {
         activeGroup.status && <Typography variant="body1" color="warning">{activeGroup.status}</Typography>
       }
       {
-        hasStartDate && !started && <Typography variant="body1">Starts in <Countdown date={activeGroup.guards.startDate.date.toString(10) * 1000} /></Typography>
+        hasStartDate && !started && <Typography variant="body1">Starts in <Countdown date={activeGroup?.guards?.startDate?.date?.toString(10) * 1000} /></Typography>
       }
 
       {
-        hasEndDate && started && <Typography variant="body1">Ends in <Countdown date={activeGroup.guards.endDate.date.toString(10) * 1000} /></Typography>
+        hasEndDate && started && <Typography variant="body1">Ends in <Countdown date={activeGroup?.guards?.endDate?.date?.toString(10) * 1000} /></Typography>
       }
       
     </Stack>
