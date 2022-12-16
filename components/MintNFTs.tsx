@@ -565,7 +565,8 @@ export const MintNFTs = () => {
             if (e.message.includes('User rejected the request.')) {
               return <b>Failed: User rejected the request</b>
             }
-            return <b>Failed: Wallet not whitelisted.</b>
+
+            return <b>Failed: {err.message}</b>
           }
         })
   
