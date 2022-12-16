@@ -640,7 +640,6 @@ export const MintNFTs = () => {
               <div className={styles.nftPreview}>
                 <h1>{nft?.name}</h1>
                 <img
-                  width={500}
                   height={500}
                   src={nft?.json?.image || "/fallbackImage.jpg"}
                   alt="The downloaded illustration of the provided NFT address."
