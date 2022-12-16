@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { getMerkleProof, getMerkleRoot, Metaplex } from "@metaplex-foundation/js";
-import allowLists from './allow-list.json';
+import allowList from './allow-list.json';
 import toast, { Toaster } from 'react-hot-toast'
 import {
   Box,
@@ -23,10 +23,20 @@ import {
 import React from "react";
 
 function ActiveGroup({ activeGroup }) {
-  const hasStartDate = activeGroup?.guards?.startDate
-  const hasEndDate = activeGroup?.guards?.endDate;
-  const started = (activeGroup?.guards?.startDate?.date?.toString(10) || 0) * 1000 < Date.now();
-  console.log((activeGroup?.guards?.startDate?.date?.toString(10) || 0) * 1000, Date.now())
+  const [hasStartDate, setHasStartDate] = useState(false)
+  const [hasEndDate, setHasEndDate] = useState(false)
+  const [started, setStarted] = useState(false)
+
+  useEffect(() => {
+    const hasStartDate = activeGroup?.guards?.startDate
+    const hasEndDate = activeGroup?.guards?.endDate;
+    const started = (activeGroup?.guards?.startDate?.date?.toString(10) || 0) * 1000 < Date.now();
+    setHasStartDate(hasStartDate)
+    setHasEndDate(hasEndDate)
+    setStarted(started);
+    
+  }, [activeGroup])
+
   return (
     <Stack spacing={2}>
       <Typography variant="h3">{activeGroup.label}</Typography>
@@ -84,7 +94,7 @@ function Countdown({ date }) {
     return () => {
       clearInterval(id)
     }
-  }, [])
+  }, [date])
 
   return (
     <span>
@@ -162,19 +172,23 @@ export const MintNFTs = () => {
     }
   }, [nft])
 
-  // useEffect(() => {
-  //   const id = setInterval(() => {
-  //     refreshCandyMachine()
-  //   }, 2000)
-  //   return () => {
-  //     clearInterval(id);
-  //   }
-  // }, [])
+  useEffect(() => {
+    const id = setInterval(() => {
+      refreshCandyMachine()
+    }, 2000)
+    return () => {
+      clearInterval(id);
+    }
+  }, [])
 
   useEffect(() => {
+    if (activeGroup) {
+      return;
+    }
     if (!groupsWithEligibility.length) {
       return setActiveGroup(null)
     }
+    console.log(groupsWithEligibility)
     if (groupsWithEligibility.length === 1) {
       return setActiveGroup(groupsWithEligibility[0]);
     }
@@ -309,7 +323,7 @@ export const MintNFTs = () => {
       }
 
       if (item.guards.allowList != null) {
-        const proof = getMerkleProof(allowLists[item.label], metaplex.identity().publicKey.toBase58());
+        const proof = getMerkleProof(allowList[item.label], metaplex.identity().publicKey.toBase58());
         if (!proof.length) {
           return {
             ...item,
@@ -460,26 +474,44 @@ export const MintNFTs = () => {
         }
       }
 
-      if (item.tokenPayment != null) {
-        const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.tokenPayment.mint, owner: metaplex.identity().publicKey });
-        const balance = await metaplex.connection.getTokenAccountBalance(ata);
-        if (balance < item.tokenPayment.amount.basisPoints.toNumber()) {
-          return {
-            ...item,
-            status: 'Insufficient balance',
-            canMint: false
-          }
-        }
-        if (item.freezeTokenPayment != null) {
-          const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.freezeTokenPayment.mint, owner: metaplex.identity().publicKey });
+      if (item.guards.tokenPayment != null) {
+        try {
+          const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.guards.tokenPayment.mint, owner: metaplex.identity().publicKey });
           const balance = await metaplex.connection.getTokenAccountBalance(ata);
-          if (balance < item.tokenPayment.amount.basisPoints.toNumber()) {
+          if (balance < item.guards.tokenPayment.amount.basisPoints.toNumber()) {
             return {
               ...item,
               status: 'Insufficient balance',
               canMint: false
             }
           }
+        } catch {
+          return {
+            ...item,
+            status: 'Insufficient balance',
+            canMint: false
+          }
+        }
+        
+        if (item.guards.freezeTokenPayment != null) {
+          try {
+            const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.freezeTokenPayment.mint, owner: metaplex.identity().publicKey });
+            const balance = await metaplex.connection.getTokenAccountBalance(ata);
+            if (balance < item.guards.freezeTokenPayment.amount.basisPoints.toNumber()) {
+              return {
+                ...item,
+                status: 'Insufficient balance',
+                canMint: false
+              }
+            }
+          } catch {
+            return {
+              ...item,
+              status: 'Insufficient balance',
+              canMint: false
+            }
+          }
+          
         }
       }
 
@@ -526,39 +558,43 @@ export const MintNFTs = () => {
   }
 
   const onClick = async () => {
+    console.log(activeGroup)
     if (!activeGroup || !activeGroup.canMint) {
       return;
     }
     try {
       setMinting(true)
-      const mintingWallet = metaplex.identity().publicKey.toBase58();
-      const checkPromise = metaplex.candyMachines().callGuardRoute({
-        candyMachine,
-        guard: 'allowList',
-        group: activeGroup.label,
-        settings: {
-          path: 'proof',
-          merkleProof: getMerkleProof(allowLists[activeGroup.label], mintingWallet),
-        },
-      });
-      
-      toast.promise(checkPromise, {
-        loading: 'Checking allow list',
-        success: <b>Allowed to mint.</b>,
-        error: e => {
-          console.log(e.message)
-          if (e.message.includes('Requested resource not available.')) {
-            return <b>Failed: Cannot send multiple simultaneous transactions</b>
-          }
-          if (e.message.includes('User rejected the request.')) {
-            return <b>Failed: User rejected the request</b>
-          }
-          return <b>Failed: Wallet not whitelisted.</b>
-        }
-      })
+      if (activeGroup.guards.allowList) {
+        const mintingWallet = metaplex.identity().publicKey.toBase58();
+        const checkPromise = metaplex.candyMachines().callGuardRoute({
+          candyMachine,
+          guard: 'allowList',
+          group: activeGroup.label,
+          settings: {
+            path: 'proof',
+            merkleProof: getMerkleProof(allowList[activeGroup.label], mintingWallet),
+          },
+        });
 
-      await checkPromise
+        toast.promise(checkPromise, {
+          loading: 'Checking allow list',
+          success: <b>Allowed to mint.</b>,
+          error: e => {
+            console.log(e.message)
+            if (e.message.includes('Requested resource not available.')) {
+              return <b>Failed: Cannot send multiple simultaneous transactions</b>
+            }
+            if (e.message.includes('User rejected the request.')) {
+              return <b>Failed: User rejected the request</b>
+            }
+            return <b>Failed: Wallet not whitelisted.</b>
+          }
+        })
+  
+        await checkPromise
+      }
       
+
       // Here the actual mint happens. Depending on the guards that you are using you have to run some pre validation beforehand 
       // Read more: https://docs.metaplex.com/programs/candy-machine/minting#minting-with-pre-validation
       const mintPromise = metaplex?.candyMachines().mint({
@@ -577,7 +613,7 @@ export const MintNFTs = () => {
 
       setNft(nft);
     } catch (err) {
-
+      toast.error('Mint unsuccessful')
     } finally {
       setMinting(false)
     }
@@ -597,7 +633,6 @@ export const MintNFTs = () => {
                   <Tabs value={activeGroup?.label} orientation="vertical">
                     {
                       groupsWithEligibility.map(item => {
-                        console.log(item)
                         return <Tab value={item.label} onClick={() => setActiveGroup(item)} label={item.label} />
                       })
                     }
