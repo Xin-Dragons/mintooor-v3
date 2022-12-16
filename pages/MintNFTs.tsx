@@ -3,7 +3,7 @@ import { useMetaplex } from "./useMetaplex";
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { getMerkleProof, getMerkleRoot, Metaplex } from "@metaplex-foundation/js";
+import { CandyMachine, getMerkleProof, getMerkleRoot, Metaplex } from "@metaplex-foundation/js";
 import allowList from './allow-list.json';
 import toast, { Toaster } from 'react-hot-toast'
 import {
@@ -42,12 +42,12 @@ function ActiveGroup({ activeGroup }) {
       <Typography variant="h3">{activeGroup.label}</Typography>
       {
         !!(activeGroup?.guards?.mintLimit) && (
-          <Typography variant="body">Max per wallet: {activeGroup.guards.mintLimit.limit}</Typography>
+          <Typography variant="body1">Max per wallet: {activeGroup.guards.mintLimit.limit}</Typography>
         )
       }
       {
         !!(activeGroup?.guards?.allowList) && (
-          <Typography variant="body">Wallet based WL</Typography>
+          <Typography variant="body1">Wallet based WL</Typography>
         )
       }
       {
@@ -158,10 +158,10 @@ export const MintNFTs = () => {
   const [groups, setGroups] = useState<Array<any>>([]);
   const [groupsWithEligibility, setGroupsWithEligibility] = useState<Array<any>>([])
   const [activeGroup, setActiveGroup] = useState<any>(null);
-  const [candyMachine, setCandyMachine] = useState();
-  const [status, setStatus] = useState();
+  const [candyMachine, setCandyMachine] = useState<CandyMachine>();
+  const [status, setStatus] = useState<string>('');
   const [next, setNext] = useState(null)
-  const [nft, setNft] = useState();
+  const [nft, setNft] = useState(null);
   const [disableMint, setDisableMint] = useState(true);
   const [minting, setMinting] = useState(false);
   const [modalShowing, setModalShowing] = useState(false)
@@ -213,10 +213,10 @@ export const MintNFTs = () => {
 
     const next = candyMachine.candyGuard.groups
       .filter(item => item.guards.startDate)
-      .sort((a, b) => {
+      .sort((a: any, b: any) => {
         return a.guards.startDate.date.toString(10) - b.guards.startDate.date.toString(10)
       })
-      .find(item => {
+      .find((item: any) => {
         return item.guards.startDate.date.toString(10) > solanaTime;
       })
 
@@ -243,28 +243,6 @@ export const MintNFTs = () => {
     metaplex.connection.onAccountChange(metaplex.identity().publicKey,
       () => refreshCandyMachine()
     );
-
-    // add a listener to reevaluate if the user is allowed to mint if startDate is reached
-    const slot = await metaplex.connection.getSlot();
-    const solanaTime = await metaplex.connection.getBlockTime(slot);
-    const startDateGuard = candyMachine.candyGuard.guards.startDate;
-    if (startDateGuard != null) {
-      const candyStartDate = startDateGuard.date.toString(10);
-      const refreshTime = candyStartDate - solanaTime.toString(10);
-      if (refreshTime > 0) {
-        setTimeout(() => refreshCandyMachine(), refreshTime * 1000);
-      }
-    }
-
-    // also reevaluate eligibility after endDate is reached
-    const endDateGuard = candyMachine.candyGuard.guards.endDate;
-    if (endDateGuard != null) {
-      const candyEndDate = endDateGuard.date.toString(10);
-      const refreshTime = solanaTime.toString(10) - candyEndDate;
-      if (refreshTime > 0) {
-        setTimeout(() => refreshCandyMachine(), refreshTime * 1000);
-      }
-    }
   };
 
   async function refreshCandyMachine() {
@@ -285,8 +263,8 @@ export const MintNFTs = () => {
   const checkEligibility = async () => {
     // enough items available?
     if (
-      candyMachine.itemsAvailable.toString(10) -
-      candyMachine.itemsMinted.toString(10) <=
+      (candyMachine.itemsAvailable.toString(10) as unknown as bigint) -
+      (candyMachine.itemsMinted.toString(10) as unknown as bigint) <=
       0
     ) {
       setStatus("Sold out!");
@@ -609,7 +587,7 @@ export const MintNFTs = () => {
         error: err => <b>Something went wrong: {err.message}</b>
       })
 
-      const { nft } = await mintPromise
+      const { nft }: { nft: any } = await mintPromise
 
       setNft(nft);
     } catch (err) {
