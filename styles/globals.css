@@ -6,6 +6,13 @@
     }
 
     @font-face {
+      font-family: "Regards";
+      font-weight: normal;
+      font-style: normal;
+      src: url("/Regards.woff") format("woff");
+    }
+
+    @font-face {
       font-family: "Futura";
       font-weight: normal;
       font-style: normal;
@@ -83,4 +90,6 @@ a {
     box-shadow: none;
     background-color: #b3457133;}
   .MuiButton-root {background-color: #ff92be; color:#04017d;font-weight: 800 !important;}
+
+  .MuiTypography-h3 {font-family: "Regards" !important;}
 
