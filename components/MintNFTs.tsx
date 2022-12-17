@@ -6,6 +6,7 @@ import { PublicKey } from "@solana/web3.js";
 import { CandyMachine, getMerkleProof, getMerkleRoot, Metaplex } from "@metaplex-foundation/js";
 import allowList from '../allow-list.json';
 import toast, { Toaster } from 'react-hot-toast'
+
 import {
   Box,
   LinearProgress,
@@ -40,16 +41,19 @@ function ActiveGroup({ activeGroup }) {
   return (
     <Stack spacing={2}>
       <Typography variant="h3">{activeGroup.label}</Typography>
-      {
-        !!(activeGroup?.guards?.mintLimit) && (
-          <Typography variant="body1">Max per wallet: {activeGroup.guards.mintLimit.limit}</Typography>
-        )
-      }
+      <div className="mint-info">
       {
         !!(activeGroup?.guards?.allowList) && (
-          <Typography variant="body1">Wallet based WL</Typography>
+          <Typography variant="body1"><span><img src="/type.svg"/></span> Type:&nbsp; <span>WL</span></Typography>
         )
       }
+      {
+        !!(activeGroup?.guards?.mintLimit) && (
+          <Typography variant="body1"><span><img src="/nfts.svg"/></span>Max NFTs:&nbsp; <span>{activeGroup.guards.mintLimit.limit}</span></Typography>
+        )
+      }
+</div>
+<div className="mint-status">
       {
         activeGroup.status && <Typography variant="body1" color="warning">{activeGroup.status}</Typography>
       }
@@ -59,7 +63,7 @@ function ActiveGroup({ activeGroup }) {
 
       {
         hasEndDate && started && <Typography variant="body1">Ends in <Countdown date={activeGroup?.guards?.endDate?.date?.toString(10) * 1000} /></Typography>
-      }
+      }</div>
       
     </Stack>
 
@@ -131,7 +135,7 @@ function MintProgress ({ candyMachine }) {
       <Box sx={{ width: '100%' }} mt={2}>
         <LinearProgress variant="determinate" value={actual / total * 100} sx={{ height: 10, borderRadius: 2 }} />
       </Box>
-      <p>Remaining: {total - actual}</p>
+      <p className="remaining-f"><span><img src="/nfts.svg"/></span>&nbsp; Remaining:&nbsp; <span>{total - actual}</span></p>
     </Box>
   )
 }
@@ -146,8 +150,7 @@ function Next({ next }) {
 
   return (
     <div>
-      <p>Next: {next.label}</p>
-      <p>Starts in <Countdown date={next?.guards?.startDate?.date.toString(10) * 1000}/></p>
+      <p><b>Next: <span>{next.label}</span></b>  <span className="counter-fw">Starts in <Countdown date={next?.guards?.startDate?.date.toString(10) * 1000}/></span></p>
     </div>
   )
 }
@@ -354,7 +357,7 @@ export const MintNFTs = () => {
         if (costInLamports > walletBalance) {
           return {
             ...item,
-            status: 'Requirements not met',
+            status: 'Insufficient SOL Balance',
             canMint: false
           }
         }
@@ -600,13 +603,15 @@ export const MintNFTs = () => {
   };
 
   return (
+    <>
     <Container>
+
       <Toaster />
       <Stack spacing={2}>
-        <Typography variant="h1"><img src="/ss.svg"/></Typography>
+        <Typography variant="h1"><img src="/android-chrome-192x192.png"/></Typography>
         <Card>
           <CardContent>
-            <Stack direction="row" spacing={5}>
+            <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}}>
               {
                 !!(groupsWithEligibility.length) && (
                   <Tabs value={activeGroup?.label} orientation="vertical">
@@ -618,11 +623,11 @@ export const MintNFTs = () => {
                   </Tabs>
                 )
               }
-              <Stack sx={{flexGrow: 1}} spacing={2}>
+              <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} >
                 {
                   activeGroup && <ActiveGroup activeGroup={activeGroup} />
                 }
-                <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !activeGroup.canMint} variant="contained">
+                <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !activeGroup.canMint} variant="contained" className="mint-button">
                   mint NFT
                   {minting && <CircularProgress />}
                 </Button>
@@ -632,10 +637,9 @@ export const MintNFTs = () => {
                 {
                   candyMachine && <MintProgress candyMachine={candyMachine} />
                 }
-                {
-                  next && <Next next={next} />
-                }
+                
               </Stack>
+              <img src="/sample2.jpg"className="nft-sample"/>
             </Stack>
             <Modal open={modalShowing} onClose={() => setModalShowing(false)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div className={styles.nftPreview}>
@@ -651,6 +655,8 @@ export const MintNFTs = () => {
         </Card>
         <Typography variant="h4"><a href="https://www.xlabs.so/"><img src="/xlaunchpad.png" alt="XLaunchpad logo" className="xlabs"/></a></Typography>
       </Stack>
-    </Container>
+    </Container>      {
+      next && <div className="next-phase"><Next next={next}/></div>
+    }</>
   );
 };
