@@ -354,7 +354,7 @@ export const MintNFTs = () => {
         if (costInLamports > walletBalance) {
           return {
             ...item,
-            status: 'Requirements not met',
+            status: 'Insufficient SOL Balance',
             canMint: false
           }
         }
