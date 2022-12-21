@@ -654,10 +654,6 @@ export const MintNFTs = () => {
                 {
                   candyMachine && <MintProgress candyMachine={candyMachine} />
                 }
-
-                {
-                  <h2>PAUSED</h2>
-                }
                 
               </Stack>
               <img src="/sample2.jpg"className="nft-sample"/>
