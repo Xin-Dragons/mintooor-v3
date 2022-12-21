@@ -609,9 +609,9 @@ export const MintNFTs = () => {
       <Toaster />
       <Stack spacing={2}>
         <Typography variant="h1"><img src="/android-chrome-192x192.png"/></Typography>
-        <Card>
+        <Card className="main-window">
           <CardContent>
-            <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}}>
+            <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}} className="main-stack">
               {
                 !!(groupsWithEligibility.length) && (
                   <Tabs value={activeGroup?.label} orientation="vertical">
@@ -623,7 +623,8 @@ export const MintNFTs = () => {
                   </Tabs>
                 )
               }
-              <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} >
+              <img src="/sample2.jpg"className="nft-sample mobile"/>
+              <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} className="mint-now">
                 {
                   activeGroup && <ActiveGroup activeGroup={activeGroup} />
                 }
