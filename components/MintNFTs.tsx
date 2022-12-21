@@ -23,7 +23,7 @@ import {
 } from '@mui/material'
 import React from "react";
 
-function ActiveGroup({ group }) {
+function ActiveGroup({ group, onExpired }) {
   const [hasStartDate, setHasStartDate] = useState(false)
   const [hasEndDate, setHasEndDate] = useState(false)
   const [started, setStarted] = useState(false)
@@ -59,14 +59,16 @@ function ActiveGroup({ group }) {
       </div>
       <div className="mint-status">
         {
-          group.status && <Typography variant="body1" color="warning">{group.status}</Typography>
+          group.status
+            ? <Typography variant="body1" color="warning">{group.status}</Typography>
+            : <Typography variant="body1" color="warning">Eligible to mint</Typography>
         }
         {
-          hasStartDate && !started && <Typography variant="body1">Starts in <Countdown date={group?.guards?.startDate?.date?.toString(10) * 1000} /></Typography>
+          hasStartDate && !started && <Typography variant="body1">Starts in <Countdown date={group?.guards?.startDate?.date?.toString(10) * 1000} onExpired={onExpired} /></Typography>
         }
 
         {
-          hasEndDate && started && <Typography variant="body1">Ends in <Countdown date={group?.guards?.endDate?.date?.toString(10) * 1000} /></Typography>
+          hasEndDate && started && <Typography variant="body1">Ends in <Countdown date={group?.guards?.endDate?.date?.toString(10) * 1000} onExpired={onExpired} /></Typography>
         }
       </div>
     </Stack>
@@ -74,7 +76,7 @@ function ActiveGroup({ group }) {
   )
 }
 
-function Countdown({ date }) {
+function Countdown({ date, onExpired = () => {} }) {
   const [days, setDays] = useState(0);
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
@@ -102,10 +104,19 @@ function Countdown({ date }) {
   useEffect(() => {
     updateTimer();
     const id = setInterval(updateTimer, 1000)
+    if (expired) {
+      clearInterval(id);
+    }
     return () => {
       clearInterval(id)
     }
-  }, [date])
+  }, [date, expired])
+
+  useEffect(() => {
+    if (expired) {
+      onExpired()
+    }
+  }, [expired])
 
   return (
     <span>
@@ -642,7 +653,7 @@ export const MintNFTs = () => {
               <img src="/sample2.jpg"className="nft-sample mobile"/>
               <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} className="mint-now">
                 {
-                  activeGroup && <ActiveGroup group={eligibleGroup} />
+                  activeGroup && <ActiveGroup group={eligibleGroup} onExpired={refreshCandyMachine} />
                 }
                 <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !eligibleGroup || !eligibleGroup.canMint} variant="contained" className="mint-button">
                   mint NFT
