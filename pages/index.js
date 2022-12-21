@@ -12,14 +12,17 @@ import {
   SolflareWalletAdapter,
   TorusWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
-import {
-  WalletModalProvider,
-  WalletMultiButton,
-} from "@solana/wallet-adapter-react-ui";
-import { clusterApiUrl } from "@solana/web3.js";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { MetaplexProvider } from "../components/MetaplexProvider";
 import { MintNFTs } from "../components/MintNFTs";
 import "@solana/wallet-adapter-react-ui/styles.css";
+import dynamic from 'next/dynamic';
+
+const WalletMultiButtonDynamic = dynamic(
+    async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+    { ssr: false }
+);
+
 
 export default function Home() {
   const endpoint = process.env.NEXT_PUBLIC_RPC_HOST;
@@ -42,7 +45,7 @@ export default function Home() {
           <WalletModalProvider>
             <MetaplexProvider>
               <div className={styles.App}>
-                <WalletMultiButton />
+                <WalletMultiButtonDynamic />
                 <MintNFTs />
               </div>
             </MetaplexProvider>
