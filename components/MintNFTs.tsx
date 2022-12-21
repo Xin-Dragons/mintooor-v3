@@ -28,10 +28,6 @@ function ActiveGroup({ group }) {
   const [hasEndDate, setHasEndDate] = useState(false)
   const [started, setStarted] = useState(false)
 
-  if (!group) {
-    return null;
-  }
-
   useEffect(() => {
     const hasStartDate = group?.guards?.startDate
     const hasEndDate = group?.guards?.endDate;
@@ -41,6 +37,10 @@ function ActiveGroup({ group }) {
     setStarted(started);
     
   }, [group])
+
+  if (!group) {
+    return null;
+  }
 
   return (
     <Stack spacing={2}>
@@ -259,7 +259,7 @@ export const MintNFTs = () => {
     const candyMachine = await metaplex
       .candyMachines()
       .findByAddress({ address: candyMachineAddress });
-      
+
     setCandyMachine(candyMachine);
   }
 
