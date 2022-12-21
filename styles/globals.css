@@ -212,3 +212,17 @@
   .mint-status {background:rgba(0, 0, 0, 0.25);padding: 5px;border:1px dashed #79006d;border-radius: 10px;}
   .mint-status p {font-size: 12px !important;}
   .mint-button {font-family: "Gilroy" !important;font-size:35px !important;color:#000 !important}
+  .mobile {display: none;}
+  @media only screen and (max-width: 600px) {
+.wallet-adapter-dropdown {position: relative !important;left:auto; top: 0;}
+.main-stack {display: flex;flex-direction: column !important;}
+.nft-sample {width: 100%;margin:0 !important;padding:0 !important;margin-top: 20px !important;display:none}
+.mobile {display: block;}
+.mint-now {max-width: none !important;margin-left:0 !important;margin-top:20px !important}
+.MuiTab-root {border:1px solid #ff47edb7 !important;margin-bottom:3px !important}
+.Mui-selected {background: #ff47ed79 !important ;}
+.main-window {margin-top: 0 !important;}
+.next-phase {position: relative !important; }
+.next-phase div p {display:flex; flex-direction: column !important;width: 90%;}
+.counter-fw {width: 100%;text-align: center;padding-top: 5px;}
+  }
