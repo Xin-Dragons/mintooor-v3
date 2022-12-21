@@ -624,7 +624,7 @@ export const MintNFTs = () => {
 
       <Toaster />
       <Stack spacing={2}>
-        <Typography variant="h1"><img src="/android-chrome-192x192.png"/></Typography>
+        <Typography variant="h1"><img width={192} src="/logo.png"/></Typography>
         <Card className="main-window">
           <CardContent>
             <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}} className="main-stack">
