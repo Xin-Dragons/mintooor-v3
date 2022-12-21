@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { CandyMachine, getMerkleProof, getMerkleRoot, Metaplex } from "@metaplex-foundation/js";
-import allowList from '../allow-list.json';
+import allowList from '../allow-lists-prod';
 import toast, { Toaster } from 'react-hot-toast'
 
 import {
@@ -23,48 +23,52 @@ import {
 } from '@mui/material'
 import React from "react";
 
-function ActiveGroup({ activeGroup }) {
+function ActiveGroup({ group }) {
   const [hasStartDate, setHasStartDate] = useState(false)
   const [hasEndDate, setHasEndDate] = useState(false)
   const [started, setStarted] = useState(false)
 
+  if (!group) {
+    return null;
+  }
+
   useEffect(() => {
-    const hasStartDate = activeGroup?.guards?.startDate
-    const hasEndDate = activeGroup?.guards?.endDate;
-    const started = (activeGroup?.guards?.startDate?.date?.toString(10) || 0) * 1000 < Date.now();
+    const hasStartDate = group?.guards?.startDate
+    const hasEndDate = group?.guards?.endDate;
+    const started = (group?.guards?.startDate?.date?.toString(10) || 0) * 1000 < Date.now();
     setHasStartDate(hasStartDate)
     setHasEndDate(hasEndDate)
     setStarted(started);
     
-  }, [activeGroup])
+  }, [group])
 
   return (
     <Stack spacing={2}>
-      <Typography variant="h3">{activeGroup.label}</Typography>
+      <Typography variant="h3">{group.label}</Typography>
       <div className="mint-info">
-      {
-        !!(activeGroup?.guards?.allowList) && (
-          <Typography variant="body1"><span><img src="/type.svg"/></span> Type:&nbsp; <span>WL</span></Typography>
-        )
-      }
-      {
-        !!(activeGroup?.guards?.mintLimit) && (
-          <Typography variant="body1"><span><img src="/nfts.svg"/></span>Max NFTs:&nbsp; <span>{activeGroup.guards.mintLimit.limit}</span></Typography>
-        )
-      }
-</div>
-<div className="mint-status">
-      {
-        activeGroup.status && <Typography variant="body1" color="warning">{activeGroup.status}</Typography>
-      }
-      {
-        hasStartDate && !started && <Typography variant="body1">Starts in <Countdown date={activeGroup?.guards?.startDate?.date?.toString(10) * 1000} /></Typography>
-      }
+        {
+          !!(group?.guards?.allowList) && (
+            <Typography variant="body1"><span><img src="/type.svg"/></span> Type:&nbsp; <span>WL</span></Typography>
+          )
+        }
+        {
+          !!(group?.guards?.mintLimit) && (
+            <Typography variant="body1"><span><img src="/nfts.svg"/></span>Max NFTs:&nbsp; <span>{group.guards.mintLimit.limit}</span></Typography>
+          )
+        }
+      </div>
+      <div className="mint-status">
+        {
+          group.status && <Typography variant="body1" color="warning">{group.status}</Typography>
+        }
+        {
+          hasStartDate && !started && <Typography variant="body1">Starts in <Countdown date={group?.guards?.startDate?.date?.toString(10) * 1000} /></Typography>
+        }
 
-      {
-        hasEndDate && started && <Typography variant="body1">Ends in <Countdown date={activeGroup?.guards?.endDate?.date?.toString(10) * 1000} /></Typography>
-      }</div>
-      
+        {
+          hasEndDate && started && <Typography variant="body1">Ends in <Countdown date={group?.guards?.endDate?.date?.toString(10) * 1000} /></Typography>
+        }
+      </div>
     </Stack>
 
   )
@@ -77,24 +81,27 @@ function Countdown({ date }) {
   const [seconds, setSeconds] = useState(0);
   const [expired, setExpired] = useState(false);
 
+  function updateTimer() {
+    const now = Date.now();
+    const distance = Math.abs(date - now);
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    setDays(days)
+    setHours(hours)
+    setMinutes(minutes)
+    setSeconds(seconds)
+
+    if (distance < 0) {
+      setExpired(true)
+    }
+  }
+
   useEffect(() => {
-    const id = setInterval(() => {
-      const now = Date.now();
-      const distance = Math.abs(date - now);
-
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-      setDays(days)
-      setHours(hours)
-      setMinutes(minutes)
-      setSeconds(seconds)
-
-      if (distance < 0) {
-        setExpired(true)
-      }
-    }, 1000)
+    updateTimer();
+    const id = setInterval(updateTimer, 1000)
     return () => {
       clearInterval(id)
     }
@@ -160,7 +167,7 @@ export const MintNFTs = () => {
   const wallet = useWallet();
   const [groups, setGroups] = useState<Array<any>>([]);
   const [groupsWithEligibility, setGroupsWithEligibility] = useState<Array<any>>([])
-  const [activeGroup, setActiveGroup] = useState<any>(null);
+  const [activeGroup, setActiveGroup] = useState<string>(null);
   const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   const [status, setStatus] = useState<string>('');
   const [next, setNext] = useState(null)
@@ -191,19 +198,18 @@ export const MintNFTs = () => {
     if (!groupsWithEligibility.length) {
       return setActiveGroup(null)
     }
-    console.log(groupsWithEligibility)
     if (groupsWithEligibility.length === 1) {
-      return setActiveGroup(groupsWithEligibility[0]);
+      return setActiveGroup(groupsWithEligibility[0].label);
     }
     const firstEligible = groupsWithEligibility.find(item => item.canMint);
     if (firstEligible) {
-      setActiveGroup(firstEligible)
+      setActiveGroup(firstEligible.label)
     } else {
       const publicGroup = groupsWithEligibility.find(group => group.label === 'Public');
       if (publicGroup) {
-        setActiveGroup(publicGroup)
+        setActiveGroup(publicGroup.label)
       } else {
-        setActiveGroup(groupsWithEligibility[0])
+        setActiveGroup(groupsWithEligibility[0].label)
       }
     }
 
@@ -253,7 +259,7 @@ export const MintNFTs = () => {
     const candyMachine = await metaplex
       .candyMachines()
       .findByAddress({ address: candyMachineAddress });
-
+      
     setCandyMachine(candyMachine);
   }
 
@@ -539,21 +545,26 @@ export const MintNFTs = () => {
   }
 
   const onClick = async () => {
-    console.log(activeGroup)
-    if (!activeGroup || !activeGroup.canMint) {
+    if (!activeGroup) {
       return;
     }
+    const group = groupsWithEligibility.find(g => g.label === activeGroup);
+    if (!group || !group.canMint) {
+      toast.error('Not eligible to mint in this group')
+      return
+    }
+
     try {
       setMinting(true)
-      if (activeGroup.guards.allowList) {
+      if (group.guards.allowList) {
         const mintingWallet = metaplex.identity().publicKey.toBase58();
         const checkPromise = metaplex.candyMachines().callGuardRoute({
           candyMachine,
           guard: 'allowList',
-          group: activeGroup.label,
+          group: group.label,
           settings: {
             path: 'proof',
-            merkleProof: getMerkleProof(allowList[activeGroup.label], mintingWallet),
+            merkleProof: getMerkleProof(allowList[group.label], mintingWallet),
           },
         });
 
@@ -561,7 +572,7 @@ export const MintNFTs = () => {
           loading: 'Checking allow list',
           success: <b>Allowed to mint.</b>,
           error: e => {
-            console.log(e.message)
+            console.error(e)
             if (e.message.includes('Requested resource not available.')) {
               return <b>Failed: Cannot send multiple simultaneous transactions</b>
             }
@@ -569,7 +580,7 @@ export const MintNFTs = () => {
               return <b>Failed: User rejected the request</b>
             }
 
-            return <b>Failed: {e.message}</b>
+            return <b>Failed: check console for more details</b>
           }
         })
   
@@ -582,13 +593,16 @@ export const MintNFTs = () => {
       const mintPromise = metaplex?.candyMachines().mint({
         candyMachine,
         collectionUpdateAuthority: candyMachine.authorityAddress,
-        group: activeGroup.label
+        group: group.label
       });
 
       toast.promise(mintPromise, {
         loading: 'Minting...',
         success: <b>Success!</b>,
-        error: err => <b>Something went wrong: {err.message}</b>
+        error: err => {
+          console.error(err);
+          return <b>Mint failed. Check the console for more details</b>
+        }
       })
 
       const { nft }: { nft: any } = await mintPromise
@@ -602,6 +616,8 @@ export const MintNFTs = () => {
     
   };
 
+  const eligibleGroup = groupsWithEligibility.find(g => g.label === activeGroup);
+
   return (
     <>
     <Container>
@@ -614,10 +630,10 @@ export const MintNFTs = () => {
             <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}} className="main-stack">
               {
                 !!(groupsWithEligibility.length) && (
-                  <Tabs value={activeGroup?.label} orientation="vertical">
+                  <Tabs value={activeGroup} orientation="vertical">
                     {
                       groupsWithEligibility.map((item, index) => {
-                        return <Tab key={index} value={item.label} onClick={() => setActiveGroup(item)} label={item.label} />
+                        return <Tab key={index} value={item.label} onClick={() => setActiveGroup(item.label)} label={item.label} />
                       })
                     }
                   </Tabs>
@@ -626,9 +642,9 @@ export const MintNFTs = () => {
               <img src="/sample2.jpg"className="nft-sample mobile"/>
               <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} className="mint-now">
                 {
-                  activeGroup && <ActiveGroup activeGroup={activeGroup} />
+                  activeGroup && <ActiveGroup group={eligibleGroup} />
                 }
-                <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !activeGroup.canMint} variant="contained" className="mint-button">
+                <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !eligibleGroup || !eligibleGroup.canMint} variant="contained" className="mint-button">
                   mint NFT
                   {minting && <CircularProgress />}
                 </Button>
