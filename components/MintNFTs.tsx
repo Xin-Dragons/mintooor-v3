@@ -148,7 +148,7 @@ function Countdown({ date, onExpired = () => {} }) {
 function MintProgress ({ candyMachine }) {
   const actual = candyMachine.itemsMinted.toString(10)
   // const total = candyMachine.itemsAvailable.toString(10)
-  const total = candyMachine.candyGuard.guards.redeemedAmount.maximum.toNumber() + 444
+  const total = candyMachine.candyGuard.guards.redeemedAmount.maximum.toNumber()
   console.log(total)
   return (
     <Box>
