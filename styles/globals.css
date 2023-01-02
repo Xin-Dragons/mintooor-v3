@@ -92,12 +92,12 @@
   }
 
   .wallet-adapter-button-trigger {
-    background-color: #FF47ED !important;
+    background-color: #a6d6d8 !important;
     color: #1e1e1f !important
   }
 
   .MuiLinearProgress-bar {
-    background: #FF47ED !important;
+    background: #6cb7c1 !important;
     border-radius: 25px !important;
   }
 
@@ -112,12 +112,12 @@
   }
 
   .MuiTab-root {
-    color: #FF47ED !important;
+    color: #6cb7c1 !important;
     font-weight: 800 !important;
   }
 
   .MuiTabs-indicator {
-    background-color: #b34571 !important;
+    background-color: #45b3ae !important;
   }
 
   .Mui-selected {
@@ -129,7 +129,7 @@
   }
 
   .MuiButton-contained {
-    background-color: #FF47ED !important;
+    background-color: #6cb7c1 !important;
     color: #04017d !important;
     font-weight: 800 !important;
   }
@@ -137,7 +137,7 @@
   .MuiButton-contained.Mui-disabled {
     color: rgba(255, 255, 255, 0.26) !important;
     box-shadow: none;
-    background-color: #FF47ED33 !important;
+    background-color: #6cb7c133 !important;
   }
 
   .MuiTypography-h3,
@@ -185,7 +185,7 @@
     font-weight: bold;
     display: inline-block;
     padding: 6px 0 6px 10px;
-    background-color: #FF47ED;
+    background-color: #6cb7c1;
     border-radius: 15px;
     margin-right: 15px;
   }
@@ -202,14 +202,14 @@
     display: inline-block;
   }
 
-  .nft-sample {width: 30%;height:30%;border-radius: 15px;box-shadow: 0 0 35px #FF47ED;}
+  .nft-samples {width: 40%;height:40%;border-radius: 15px;box-shadow: 0 0 35px #6cb7c1;}
   .mint-info{display:flex;flex-direction: row;justify-content: space-around;}
   .mint-info p, .remaining-f  {display: flex;}
-  .mint-info span, .remaining-f span {color:#FF47ED;font-family: "Gilroy"}
+  .mint-info span, .remaining-f span {color:#6cb7c1;font-family: "Gilroy"}
   .mint-info img {margin-right:3px}
   .info-t {color:#ffcafa;font-weight: bolder;font-family: "Gilroy"}
   .remaining-f {margin: 0;margin-top: 20px;line-height: 26px;justify-content: center;}
-  .mint-status {background:rgba(0, 0, 0, 0.25);padding: 5px;border:1px dashed #79006d;border-radius: 10px;}
+  .mint-status {background:rgba(0, 0, 0, 0.25);padding: 5px;border:1px dashed #006b79;border-radius: 10px;}
   .mint-status p {font-size: 12px !important;}
   .mint-button {font-family: "Gilroy" !important;font-size:35px !important;color:#000 !important}
   .mobile {display: none;}
@@ -219,8 +219,8 @@
 .nft-sample {width: 100%;margin:0 !important;padding:0 !important;margin-top: 20px !important;display:none}
 .mobile {display: block;}
 .mint-now {max-width: none !important;margin-left:0 !important;margin-top:20px !important}
-.MuiTab-root {border:1px solid #ff47edb7 !important;margin-bottom:3px !important}
-.Mui-selected {background: #ff47ed79 !important ;}
+.MuiTab-root {border:1px solid #6cb7c1b7 !important;margin-bottom:3px !important}
+.Mui-selected {background: #6cb7c179 !important ;}
 .main-window {margin-top: 0 !important;}
 .next-phase {position: relative !important; }
 .next-phase div p {display:flex; flex-direction: column !important;width: 90%;}
