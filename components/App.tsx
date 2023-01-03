@@ -16,7 +16,7 @@ export function App() {
       <Toaster />
       <Stack spacing={2}>
         <Typography variant="h1"><img width={192} src="/logo.png"/></Typography>
-        <Tabs value={activeMint}>
+        <Tabs value={activeMint} className="cm-tabs">
           {
             Object.keys(candyMachines).map((cm, index) => {
               return <Tab key={index} value={cm} onClick={() => setActiveMint(cm)} label={cm} />
