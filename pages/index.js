@@ -14,7 +14,7 @@ import {
 } from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { MetaplexProvider } from "../components/MetaplexProvider";
-import { MintNFTs } from "../components/MintNFTs";
+import { App } from "../components/App";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import dynamic from 'next/dynamic';
 
@@ -46,7 +46,7 @@ export default function Home() {
             <MetaplexProvider>
               <div className={styles.App}>
                 <WalletMultiButtonDynamic />
-                <MintNFTs />
+                <App />
               </div>
             </MetaplexProvider>
           </WalletModalProvider>

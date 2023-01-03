@@ -11,7 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
-    "@metaplex-foundation/js": "0.17.6",
+    "@metaplex-foundation/js": "^0.17.12",
     "@mui/material": "^5.11.0",
     "@solana/wallet-adapter-base": "^0.9.17",
     "@solana/wallet-adapter-react": "^0.15.19",

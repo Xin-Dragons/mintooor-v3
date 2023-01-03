@@ -3,9 +3,8 @@ import { useMetaplex } from "./useMetaplex";
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { CandyMachine, getMerkleProof, getMerkleRoot, Metaplex } from "@metaplex-foundation/js";
-import allowList from '../allow-lists-prod';
-import toast, { Toaster } from 'react-hot-toast'
+import { CandyMachine, Metaplex } from "@metaplex-foundation/js";
+import toast from 'react-hot-toast'
 
 import {
   Box,
@@ -22,6 +21,7 @@ import {
   Modal
 } from '@mui/material'
 import React from "react";
+import { sample } from "lodash";
 
 function ActiveGroup({ group, onExpired }) {
   const [hasStartDate, setHasStartDate] = useState(false)
@@ -150,7 +150,6 @@ function MintProgress ({ candyMachine }) {
   // const total = candyMachine.itemsAvailable.toString(10)
   //const total = candyMachine.candyGuard.guards.redeemedAmount.maximum.toNumber()
 const total = 10
-  console.log(total)
   return (
     <Box>
       <Box sx={{ width: '100%' }} mt={2}>
@@ -176,9 +175,10 @@ function Next({ next }) {
   )
 }
 
-export const MintNFTs = () => {
+export const MintNFTs = ({ cmId: initialCmid }: { cmId: string }) => {
   const { metaplex }: { metaplex: Metaplex } = useMetaplex();
   const wallet = useWallet();
+  const [cmId, setCmid] = useState(initialCmid)
   const [groups, setGroups] = useState<Array<any>>([]);
   const [groupsWithEligibility, setGroupsWithEligibility] = useState<Array<any>>([])
   const [activeGroup, setActiveGroup] = useState<string>(null);
@@ -189,6 +189,22 @@ export const MintNFTs = () => {
   const [disableMint, setDisableMint] = useState(true);
   const [minting, setMinting] = useState(false);
   const [modalShowing, setModalShowing] = useState(false)
+
+  useEffect(() => {
+    setCmid(initialCmid)
+  }, [initialCmid])
+
+  async function updateCM() {
+    const candyMachine = await metaplex
+      .candyMachines()
+      .findByAddress({ address: new PublicKey(cmId) });
+
+    setCandyMachine(candyMachine)
+  }
+
+  useEffect(() => {
+    updateCM()
+  }, [cmId])
 
   useEffect(() => {
     if (nft) {
@@ -203,10 +219,10 @@ export const MintNFTs = () => {
     return () => {
       clearInterval(id);
     }
-  }, [])
+  }, [cmId])
 
   useEffect(() => {
-    if (activeGroup) {
+    if (activeGroup && candyMachine.candyGuard.groups.map(g => g.label).includes(activeGroup)) {
       return;
     }
     if (!groupsWithEligibility.length) {
@@ -250,9 +266,6 @@ export const MintNFTs = () => {
     getNext()
   }, [candyMachine])
   
-  const candyMachineAddress = new PublicKey(
-    process.env.NEXT_PUBLIC_CANDY_MACHINE_ID as string
-  );
   let walletBalance;
   let listenersAdded = false;
   const addListener = async () => {
@@ -269,10 +282,13 @@ export const MintNFTs = () => {
   };
 
   async function refreshCandyMachine() {
+    const candyMachineAddress = new PublicKey(cmId);
     // read candy machine state from chain
     const candyMachine = await metaplex
       .candyMachines()
       .findByAddress({ address: candyMachineAddress });
+
+    console.log({ candyMachine })
 
     setCandyMachine(candyMachine);
   }
@@ -407,7 +423,7 @@ export const MintNFTs = () => {
         if (nftsInCollection.length < 1) {
           return {
             ...item,
-            status: 'Requirements not met',
+            status: 'No Xin Dragons detected',
             canMint: false
           }
         }
@@ -452,15 +468,24 @@ export const MintNFTs = () => {
       }
 
       if (item.guards.tokenBurn != null) {
-        const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.guards.tokenBurn.mint, owner: metaplex.identity().publicKey });
-        const balance = await metaplex.connection.getTokenAccountBalance(ata);
-        if (balance < item.guards.tokenBurn.amount.basisPoints.toNumber()) {
+        try {
+          const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.guards.tokenBurn.mint, owner: metaplex.identity().publicKey });
+          const balance = await metaplex.connection.getTokenAccountBalance(ata);
+          if (balance < item.guards.tokenBurn.amount.basisPoints.toNumber()) {
+            return {
+              ...item,
+              status: 'No WL tokens detected',
+              canMint: false
+            }
+          }
+        } catch {
           return {
             ...item,
-            status: 'Requirements not met',
+            status: 'No WL tokens detected',
             canMint: false
           }
         }
+        
       }
 
       if (item.guards.tokenGate != null) {
@@ -570,36 +595,102 @@ export const MintNFTs = () => {
 
     try {
       setMinting(true)
-      if (group.guards.allowList) {
-        const mintingWallet = metaplex.identity().publicKey.toBase58();
-        const checkPromise = metaplex.candyMachines().callGuardRoute({
-          candyMachine,
-          guard: 'allowList',
-          group: group.label,
-          settings: {
-            path: 'proof',
-            merkleProof: getMerkleProof(allowList[group.label], mintingWallet),
-          },
+      // if (group.guards.allowList) {
+      //   const mintingWallet = metaplex.identity().publicKey.toBase58();
+      //   const checkPromise = metaplex.candyMachines().callGuardRoute({
+      //     candyMachine,
+      //     guard: 'allowList',
+      //     group: group.label,
+      //     settings: {
+      //       path: 'proof',
+      //       merkleProof: getMerkleProof(allowList[group.label], mintingWallet),
+      //     },
+      //   });
+
+      //   toast.promise(checkPromise, {
+      //     loading: 'Checking allow list',
+      //     success: <b>Allowed to mint.</b>,
+      //     error: e => {
+      //       console.error(e)
+      //       if (e.message.includes('Requested resource not available.')) {
+      //         return <b>Failed: Cannot send multiple simultaneous transactions</b>
+      //       }
+      //       if (e.message.includes('User rejected the request.')) {
+      //         return <b>Failed: User rejected the request</b>
+      //       }
+
+      //       return <b>Failed: check console for more details</b>
+      //     }
+      //   })
+  
+      //   await checkPromise
+      // }
+
+      if (group.guards.nftGate) {
+        const ownedNfts = await metaplex.nfts().findAllByOwner({ owner: metaplex.identity().publicKey });
+        const nftsInCollection = ownedNfts.filter(obj => {
+          return (obj.collection?.address.toBase58() === group.guards.nftGate.requiredCollection.toBase58()) && (obj.collection?.verified === true);
         });
 
-        toast.promise(checkPromise, {
-          loading: 'Checking allow list',
-          success: <b>Allowed to mint.</b>,
-          error: e => {
-            console.error(e)
-            if (e.message.includes('Requested resource not available.')) {
-              return <b>Failed: Cannot send multiple simultaneous transactions</b>
-            }
-            if (e.message.includes('User rejected the request.')) {
-              return <b>Failed: User rejected the request</b>
-            }
-
-            return <b>Failed: check console for more details</b>
+        const mintPromise = metaplex?.candyMachines().mint({
+          candyMachine,
+          collectionUpdateAuthority: candyMachine.authorityAddress,
+          group: group.label,
+          guards: {
+            nftGate: {
+              mint: sample(nftsInCollection).mintAddress
+            },
+          }
+        });
+  
+        toast.promise(mintPromise, {
+          loading: 'Minting...',
+          success: <b>Success!</b>,
+          error: err => {
+            console.error(err);
+            return <b>Mint failed. Check the console for more details</b>
           }
         })
   
-        await checkPromise
+        const { nft }: { nft: any } = await mintPromise
+  
+        return setNft(nft);
       }
+
+      if (group.guards.nftBurn) {
+        const ownedNfts = await metaplex.nfts().findAllByOwner({ owner: metaplex.identity().publicKey });
+        const nftsInCollection = ownedNfts.filter(obj => {
+          return (obj.collection?.address.toBase58() === group.guards.nftBurn.requiredCollection.toBase58()) && (obj.collection?.verified === true);
+        });
+
+        const mint = sample(nftsInCollection).mintAddress;
+
+        const mintPromise = metaplex?.candyMachines().mint({
+          candyMachine,
+          collectionUpdateAuthority: candyMachine.authorityAddress,
+          group: group.label,
+          guards: {
+            nftBurn: {
+              mint
+            },
+          }
+        });
+  
+        toast.promise(mintPromise, {
+          loading: 'Minting...',
+          success: <b>Success!</b>,
+          error: err => {
+            console.error(err);
+            return <b>Mint failed. Check the console for more details</b>
+          }
+        })
+  
+        const { nft }: { nft: any } = await mintPromise
+  
+        return setNft(nft);
+      }
+
+      console.log('WEE')
       
 
       // Here the actual mint happens. Depending on the guards that you are using you have to run some pre validation beforehand 
@@ -623,6 +714,7 @@ export const MintNFTs = () => {
 
       setNft(nft);
     } catch (err) {
+      console.log(err)
       toast.error('Mint unsuccessful')
     } finally {
       setMinting(false)
@@ -633,61 +725,47 @@ export const MintNFTs = () => {
   const eligibleGroup = groupsWithEligibility.find(g => g.label === activeGroup);
 
   return (
-    <>
-    <Container>
-
-      <Toaster />
-      <Stack spacing={2}>
-        <Typography variant="h1"><img width={192} src="/logo.png"/></Typography>
-        <Card className="main-window">
-          <CardContent>
-            <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}} className="main-stack">
-              {
-                !!(groupsWithEligibility.length) && (
-                  <Tabs value={activeGroup} orientation="vertical">
-                    {
-                      groupsWithEligibility.map((item, index) => {
-                        return <Tab key={index} value={item.label} onClick={() => setActiveGroup(item.label)} label={item.label} />
-                      })
-                    }
-                  </Tabs>
-                )
-              }
-              <img src="/nfts.gif"className="nft-samples mobile"/>
-              <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} className="mint-now">
-                {
-                  activeGroup && <ActiveGroup group={eligibleGroup} onExpired={refreshCandyMachine} />
-                }
-                <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !eligibleGroup || !eligibleGroup.canMint} variant="contained" className="mint-button">
-                  mint NFT
-                  {minting && <CircularProgress />}
-                </Button>
-                {
-                  status && <Typography variant="h3">{status}</Typography>
-                }
-                {
-                  candyMachine && <MintProgress candyMachine={candyMachine} />
-                }
-                
-              </Stack>
-              <img src="/nfts.gif"className="nft-samples"/>
-            </Stack>
-            <Modal open={modalShowing} onClose={() => setModalShowing(false)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div className={styles.nftPreview}>
-                <h1>{nft?.name}</h1>
-                <img
-                  height={500}
-                  src={nft?.json?.image || "/fallbackImage.jpg"}
-                  alt="The downloaded illustration of the provided NFT address."
-                />
-              </div>
-            </Modal>
-          </CardContent>
-        </Card>
-        <Typography variant="h4"><a href="https://www.xlabs.so/"><img src="/xlaunchpad.png" alt="XLaunchpad logo" className="xlabs"/></a></Typography>
+    <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}} className="main-stack">
+      {
+        !!(groupsWithEligibility.length) && (
+          <Tabs value={activeGroup} orientation="vertical">
+            {
+              groupsWithEligibility.map((item, index) => {
+                return <Tab key={index} value={item.label} onClick={() => setActiveGroup(item.label)} label={item.label} />
+              })
+            }
+          </Tabs>
+        )
+      }
+      <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} className="mint-now">
+        {
+          activeGroup && <ActiveGroup group={eligibleGroup} onExpired={refreshCandyMachine} />
+        }
+        <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !eligibleGroup || !eligibleGroup.canMint} variant="contained" className="mint-button">
+          mint NFT
+          {minting && <CircularProgress />}
+        </Button>
+        {
+          status && <Typography variant="h3">{status}</Typography>
+        }
+        {
+          candyMachine && <MintProgress candyMachine={candyMachine} />
+        }
       </Stack>
-    </Container>      {
-      next && <div className="next-phase"><Next next={next}/></div>
-    }</>
+      <img src="/nfts.gif"className="nft-samples"/>
+      <Modal open={modalShowing} onClose={() => setModalShowing(false)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className={styles.nftPreview}>
+          <h1>{nft?.name}</h1>
+          <img
+            height={500}
+            src={nft?.json?.image || "/fallbackImage.jpg"}
+            alt="The downloaded illustration of the provided NFT address."
+          />
+        </div>
+      </Modal>
+      {
+        next && <div className="next-phase"><Next next={next}/></div>
+      }
+    </Stack>
   );
 };
