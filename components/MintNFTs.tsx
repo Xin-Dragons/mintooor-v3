@@ -751,6 +751,7 @@ export const MintNFTs = ({ cmId: initialCmid }: { cmId: string }) => {
         {
           candyMachine && <MintProgress candyMachine={candyMachine} />
         }
+        <a href="https://jup.ag/swap/SOL-Bonk" className="solbonk" target="_blank">SOL > $BONK</a>
       </Stack>
       <img src="/nfts.gif"className="nft-samples"/>
       <Modal open={modalShowing} onClose={() => setModalShowing(false)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
