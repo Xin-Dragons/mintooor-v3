@@ -779,6 +779,7 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
                 </Tabs>
               )
             }
+            <img src="/nfts.gif"className="nft-samples mobile"/>
             <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} className="mint-now">
               {
                 activeGroup && <ActiveGroup group={eligibleGroup} onExpired={refreshCandyMachine} />
