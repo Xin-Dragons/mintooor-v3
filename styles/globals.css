@@ -306,8 +306,8 @@ h1.MuiTypography-root {
     display: flex;
     flex-direction: column !important;
   }
-  .nft-sample {
-    width: 100%;
+  .nft-samples {
+    width: 100% ;
     margin: 0 !important;
     padding: 0 !important;
     margin-top: 20px !important;
