@@ -43,6 +43,7 @@ body {
   font-family: "Gilroys", Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans,
     Droid Sans, Helvetica Neue, sans-serif !important;
   color: #fff;
+  min-height: 100vh;
 }
 
 a {
