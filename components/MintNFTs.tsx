@@ -3,7 +3,7 @@ import { useMetaplex } from "./useMetaplex";
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { CandyMachine, Metaplex } from "@metaplex-foundation/js";
+import { CandyMachine, Metadata, Metaplex } from "@metaplex-foundation/js";
 import toast from 'react-hot-toast'
 
 import {
@@ -71,10 +71,10 @@ function ActiveGroup({ group, onExpired }) {
           )
         }
         {
-          !!(group?.guards?.nftBurn) && [
-            <Typography variant="body1"><span><img src="/type.svg"/></span> Type:&nbsp; <span>NFT Burn</span></Typography>,
+          !!(group?.guards?.nftBurn) && <>
+            <Typography variant="body1"><span><img src="/type.svg"/></span> Type:&nbsp; <span>NFT Burn</span></Typography>
             <Typography variant="body1">MITSU BEAR CHOSEN AT RANDOM</Typography>
-          ]
+          </>
         }
         {
           !!(group?.guards?.allowList) && (
@@ -379,16 +379,16 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
         }
       }
 
-      if (item.guards.allowList != null) {
-        const proof = getMerkleProof(allowList[item.label], metaplex.identity().publicKey.toBase58());
-        if (!proof.length) {
-          return {
-            ...item,
-            status: 'Wallet not whitelisted',
-            canMint: false
-          }
-        }
-      }
+      // if (item.guards.allowList != null) {
+      //   const proof = getMerkleProof(allowList[item.label], metaplex.identity().publicKey.toBase58());
+      //   if (!proof.length) {
+      //     return {
+      //       ...item,
+      //       status: 'Wallet not whitelisted',
+      //       canMint: false
+      //     }
+      //   }
+      // }
 
       if (item.guards.addressGate != null) {
         if (metaplex.identity().publicKey.toBase58() != item.guards.addressGate.address.toBase58()) {
@@ -672,13 +672,15 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
           return (obj.collection?.address.toBase58() === group.guards.nftGate.requiredCollection.toBase58()) && (obj.collection?.verified === true);
         });
 
+        const mint = sample(nftsInCollection) as Metadata
+
         const mintPromise = metaplex?.candyMachines().mint({
           candyMachine,
           collectionUpdateAuthority: candyMachine.authorityAddress,
           group: group.label,
           guards: {
             nftGate: {
-              mint: sample(nftsInCollection).mintAddress
+              mint: mint.mintAddress
             },
           }
         });
@@ -703,7 +705,7 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
           return (obj.collection?.address.toBase58() === group.guards.nftBurn.requiredCollection.toBase58()) && (obj.collection?.verified === true);
         });
 
-        const mint = sample(nftsInCollection).mintAddress;
+        const mint = sample(nftsInCollection) as Metadata
 
         const mintPromise = metaplex?.candyMachines().mint({
           candyMachine,
@@ -711,7 +713,7 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
           group: group.label,
           guards: {
             nftBurn: {
-              mint
+              mint: mint.mintAddress
             },
           }
         });
@@ -729,9 +731,6 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
   
         return setNft(nft);
       }
-
-      console.log('WEE')
-      
 
       // Here the actual mint happens. Depending on the guards that you are using you have to run some pre validation beforehand 
       // Read more: https://docs.metaplex.com/programs/candy-machine/minting#minting-with-pre-validation
@@ -795,7 +794,7 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
                 candyMachine && <MintProgress candyMachine={candyMachine} totalMinted={totalMinted} totalAvailable={totalAvailable} activeGroup={activeGroup} />
               }
               {
-                activeGroup === '$BONK' && <a href="https://jup.ag/swap/SOL-Bonk" className="solbonk" target="_blank">SOL > $BONK</a>
+                activeGroup === '$BONK' && <a href="https://jup.ag/swap/SOL-Bonk" className="solbonk" target="_blank" rel="noreferrer">SOL {'>'} $BONK</a>
               }
             </Stack>
             <img src="/nfts.gif"className="nft-samples"/>
