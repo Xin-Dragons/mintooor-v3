@@ -252,14 +252,14 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
     }
   }, [nft])
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      refreshCandyMachine()
-    }, 5000)
-    return () => {
-      clearInterval(id);
-    }
-  }, [cmId])
+  // useEffect(() => {
+  //   const id = setInterval(() => {
+  //     refreshCandyMachine()
+  //   }, 5000)
+  //   return () => {
+  //     clearInterval(id);
+  //   }
+  // }, [cmId])
 
   useEffect(() => {
     if (activeGroup && candyMachine.candyGuard.groups.map(g => g.label).includes(activeGroup)) {
@@ -511,7 +511,7 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
         try {
           const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.guards.tokenBurn.mint, owner: metaplex.identity().publicKey });
           const balance = await metaplex.connection.getTokenAccountBalance(ata);
-          if (balance < item.guards.tokenBurn.amount.basisPoints.toNumber()) {
+          if (balance.value.uiAmount < item.guards.tokenBurn.amount.basisPoints.toNumber()) {
             return {
               ...item,
               status: 'No WL tokens detected',

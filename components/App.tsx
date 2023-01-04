@@ -36,7 +36,7 @@ export function App() {
   }
 
   useEffect(() => {
-    const id = setInterval(getTotals, 3000);
+    const id = setInterval(getTotals, 5000);
     return () => {
       clearInterval(id)
     }
