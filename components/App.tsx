@@ -1,5 +1,6 @@
 import { Container, Stack, Typography, Card, CardContent, Tabs, Tab } from "@mui/material"
 import { PublicKey } from "@solana/web3.js"
+import { useWallet } from "@solana/wallet-adapter-react"
 import { map } from "lodash"
 import { useEffect, useState } from "react"
 import { Toaster } from "react-hot-toast"
@@ -17,6 +18,7 @@ export function App() {
   const [totalAvailable, setTotalAvailable] = useState<number>(10000);
   const [totalMinted, setTotalMinted] = useState<number>(10000);
   const { metaplex } = useMetaplex()
+  const wallet = useWallet();
 
   async function getTotals() {
     const totals = await Promise.all(map(candyMachines, async cm => {
@@ -39,6 +41,10 @@ export function App() {
       clearInterval(id)
     }
   }, [])
+
+  if (!wallet.connected) {
+    return;
+  }
 
   return (
     <Container>
