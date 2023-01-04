@@ -511,7 +511,11 @@ export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { c
         try {
           const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: item.guards.tokenBurn.mint, owner: metaplex.identity().publicKey });
           const balance = await metaplex.connection.getTokenAccountBalance(ata);
-          if (balance.value.uiAmount < item.guards.tokenBurn.amount.basisPoints.toNumber()) {
+          let amount = balance.value.uiAmount;
+          if (balance.value.decimals) {
+            amount = amount * Math.pow(10, balance.value.decimals)
+          }
+          if (amount < item.guards.tokenBurn.amount.basisPoints.toNumber()) {
             return {
               ...item,
               status: 'No WL tokens detected',
