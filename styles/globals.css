@@ -91,6 +91,10 @@ h1.MuiTypography-root {
   left: calc(50vw + 400px);
 }
 
+.logo {
+  filter: drop-shadow(0px 0px 5px #222);
+}
+
 .wallet-adapter-button-trigger {
   background-color: #a6d6d8 !important;
   color: #1e1e1f !important;
@@ -162,6 +166,7 @@ h1.MuiTypography-root {
   color: #e1e1e1;
   position: fixed;
   bottom: 0px;
+  left: 0;
   width: 100%;
   border-top: 1px solid #0059ff69;
   backdrop-filter: blur(20px);

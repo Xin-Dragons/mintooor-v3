@@ -1,21 +1,50 @@
 import { Container, Stack, Typography, Card, CardContent, Tabs, Tab } from "@mui/material"
-import { useState } from "react"
+import { PublicKey } from "@solana/web3.js"
+import { map } from "lodash"
+import { useEffect, useState } from "react"
 import { Toaster } from "react-hot-toast"
 import { MintNFTs } from "./MintNFTs"
+import { useMetaplex } from "./useMetaplex"
 
 const candyMachines = {
-  'Mitsu': 'EZCCf8i6FiamhyDzdMUARzjWurenCGqrZH7JpMP1twpS',
-  'Xin': 'BqVcQNZF64E3KLY78hV1aXsjDTaG5ns8cs72Z6Q5pBiJ',
-  '$BONK': '9xz1wm1tkFcvt6gNjF5bBrKEzKU98bPRRSVgaKRsh2XW'
+  'Mitsu': '46XowcjpCxYy7PxHHkWGytQxciQrCFb6zbNTQnAi19tD',
+  'Xin': '6k5DYH6CmLwnCXCDN6QeMkJHWqe1rbqzPktKykwhVf29',
+  '$BONK': 'BhTcB1KQkTG3toW72zSYej6gw4dyLRyFJztfv6E87u2K'
 }
 
 export function App() {
-  const [activeMint, setActiveMint] = useState<string>('Mitsu')
+  const [activeMint, setActiveMint] = useState<string>('Mitsu');
+  const [totalAvailable, setTotalAvailable] = useState<number>(10000);
+  const [totalMinted, setTotalMinted] = useState<number>(10000);
+  const { metaplex } = useMetaplex()
+
+  async function getTotals() {
+    const totals = await Promise.all(map(candyMachines, async cm => {
+      const candyMachine = await metaplex.candyMachines().findByAddress({ address: new PublicKey(cm) })
+      const actual = candyMachine.itemsMinted.toNumber()
+      const total = candyMachine.itemsAvailable.toNumber()
+      return {
+        actual,
+        total
+      }
+    }))
+
+    setTotalAvailable(totals.reduce((sum, item) => sum + item.total, 0))
+    setTotalMinted(totals.reduce((sum, item) => sum + item.actual, 0))
+  }
+
+  useEffect(() => {
+    const id = setInterval(getTotals, 3000);
+    return () => {
+      clearInterval(id)
+    }
+  }, [])
+
   return (
     <Container>
       <Toaster />
       <Stack spacing={2}>
-        <Typography variant="h1"><img width={192} src="/logo.png"/></Typography>
+        <Typography variant="h1"><img width={192} className="logo" src="/logo.png"/></Typography>
         <Tabs value={activeMint} className="cm-tabs">
           {
             Object.keys(candyMachines).map((cm, index) => {
@@ -23,11 +52,8 @@ export function App() {
             })
           }
         </Tabs>
-        <Card className="main-window">
-          <CardContent>
-            <MintNFTs cmId={candyMachines[activeMint] as string} />
-          </CardContent>
-        </Card>
+        
+        <MintNFTs cmId={candyMachines[activeMint] as string} totalMinted={totalMinted} totalAvailable={totalAvailable} />
       </Stack>
       <Typography variant="h4"><a href="https://www.xlabs.so/"><img src="/xlaunchpad.png" alt="XLaunchpad logo" className="xlabs"/></a></Typography>
     </Container>

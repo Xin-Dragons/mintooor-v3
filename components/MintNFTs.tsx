@@ -42,10 +42,40 @@ function ActiveGroup({ group, onExpired }) {
     return null;
   }
 
+  let tokenPayment = group?.guards?.tokenPayment?.amount?.basisPoints?.toNumber();
+
+  if (tokenPayment && group?.guards?.tokenBurn) {
+    const amount = group?.guards?.tokenBurn?.amount?.basisPoints?.toNumber();
+    tokenPayment += amount;
+
+    const decimals = group.label === '$XIN' ? 6 : 5
+
+    tokenPayment = tokenPayment / Math.pow(10, decimals)
+  }
+
+  const currency = group.label
+  
+
   return (
     <Stack spacing={2}>
-      <Typography variant="h3">{group.label}</Typography>
+      <Typography variant="h3">{group.label === 'LGCY' ? 'Legacy' : group.label}</Typography>
       <div className="mint-info">
+        {
+          !!(group?.guards?.tokenPayment) && (
+            <Typography variant="body1"><span><img src="/type.svg"/></span> Type:&nbsp; <span>SPL Mint</span></Typography>
+          )
+        }
+        {
+          !!(group?.label === '$XIN' && group?.guards?.tokenBurn) && (
+            <Typography variant="body1"><span></span> WL token burn</Typography>
+          )
+        }
+        {
+          !!(group?.guards?.nftBurn) && [
+            <Typography variant="body1"><span><img src="/type.svg"/></span> Type:&nbsp; <span>NFT Burn</span></Typography>,
+            <Typography variant="body1">MITSU BEAR CHOSEN AT RANDOM</Typography>
+          ]
+        }
         {
           !!(group?.guards?.allowList) && (
             <Typography variant="body1"><span><img src="/type.svg"/></span> Type:&nbsp; <span>WL</span></Typography>
@@ -54,6 +84,13 @@ function ActiveGroup({ group, onExpired }) {
         {
           !!(group?.guards?.mintLimit) && (
             <Typography variant="body1"><span><img src="/nfts.svg"/></span>Max NFTs:&nbsp; <span>{group.guards.mintLimit.limit}</span></Typography>
+          )
+        }
+        {
+          !!(tokenPayment) && (
+            <Typography variant="body1">
+              <span>{tokenPayment.toLocaleString()} <span>{currency}</span></span>
+            </Typography>
           )
         }
       </div>
@@ -106,6 +143,11 @@ function Countdown({ date, onExpired = () => {} }) {
     const id = setInterval(updateTimer, 1000)
     if (expired) {
       clearInterval(id);
+      setDays(0)
+      setHours(0)
+      setMinutes(0)
+      setSeconds(0)
+      
     }
     return () => {
       clearInterval(id)
@@ -145,11 +187,9 @@ function Countdown({ date, onExpired = () => {} }) {
 }
 
 
-function MintProgress ({ candyMachine }) {
-  const actual = candyMachine.itemsMinted.toString(10)
-  // const total = candyMachine.itemsAvailable.toString(10)
-  //const total = candyMachine.candyGuard.guards.redeemedAmount.maximum.toNumber()
-const total = 10
+function MintProgress ({ candyMachine, totalMinted, totalAvailable, activeGroup }) {
+  const actual = activeGroup === '$BONK' ? totalMinted : candyMachine.itemsMinted.toString(10)
+  const total = activeGroup === '$BONK' ? totalAvailable : candyMachine.itemsAvailable.toString(10)
   return (
     <Box>
       <Box sx={{ width: '100%' }} mt={2}>
@@ -175,7 +215,7 @@ function Next({ next }) {
   )
 }
 
-export const MintNFTs = ({ cmId: initialCmid }: { cmId: string }) => {
+export const MintNFTs = ({ cmId: initialCmid, totalMinted, totalAvailable }: { cmId: string, totalMinted: number, totalAvailable: number }) => {
   const { metaplex }: { metaplex: Metaplex } = useMetaplex();
   const wallet = useWallet();
   const [cmId, setCmid] = useState(initialCmid)
@@ -725,48 +765,57 @@ export const MintNFTs = ({ cmId: initialCmid }: { cmId: string }) => {
   const eligibleGroup = groupsWithEligibility.find(g => g.label === activeGroup);
 
   return (
-    <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}} className="main-stack">
-      {
-        !!(groupsWithEligibility.length) && (
-          <Tabs value={activeGroup} orientation="vertical">
+    <>
+      <Card className="main-window">
+        <CardContent>
+          <Stack direction="row" spacing={5} sx={{justifyContent: 'space-around'}} className="main-stack">
             {
-              groupsWithEligibility.map((item, index) => {
-                return <Tab key={index} value={item.label} onClick={() => setActiveGroup(item.label)} label={item.label} />
-              })
+              !!(groupsWithEligibility.length) && (
+                <Tabs value={activeGroup} orientation="vertical">
+                  {
+                    groupsWithEligibility.map((item, index) => {
+                      return <Tab key={index} value={item.label} onClick={() => setActiveGroup(item.label)} label={item.label === 'LGCY' ? 'Legacy' : item.label} />
+                    })
+                  }
+                </Tabs>
+              )
             }
-          </Tabs>
-        )
-      }
-      <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} className="mint-now">
-        {
-          activeGroup && <ActiveGroup group={eligibleGroup} onExpired={refreshCandyMachine} />
-        }
-        <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !eligibleGroup || !eligibleGroup.canMint} variant="contained" className="mint-button">
-          mint NFT
-          {minting && <CircularProgress />}
-        </Button>
-        {
-          status && <Typography variant="h3">{status}</Typography>
-        }
-        {
-          candyMachine && <MintProgress candyMachine={candyMachine} />
-        }
-        <a href="https://jup.ag/swap/SOL-Bonk" className="solbonk" target="_blank">SOL > $BONK</a>
-      </Stack>
-      <img src="/nfts.gif"className="nft-samples"/>
-      <Modal open={modalShowing} onClose={() => setModalShowing(false)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className={styles.nftPreview}>
-          <h1>{nft?.name}</h1>
-          <img
-            height={500}
-            src={nft?.json?.image || "/fallbackImage.jpg"}
-            alt="The downloaded illustration of the provided NFT address."
-          />
-        </div>
-      </Modal>
+            <Stack sx={{flexGrow: 1, maxWidth: 500 }} spacing={2} className="mint-now">
+              {
+                activeGroup && <ActiveGroup group={eligibleGroup} onExpired={refreshCandyMachine} />
+              }
+              <Button onClick={onClick} disabled={disableMint || minting || !activeGroup || !eligibleGroup || !eligibleGroup.canMint} variant="contained" className="mint-button">
+                mint NFT
+                {minting && <CircularProgress />}
+              </Button>
+              {
+                status && <Typography variant="h3">{status}</Typography>
+              }
+              {
+                candyMachine && <MintProgress candyMachine={candyMachine} totalMinted={totalMinted} totalAvailable={totalAvailable} activeGroup={activeGroup} />
+              }
+              {
+                activeGroup === '$BONK' && <a href="https://jup.ag/swap/SOL-Bonk" className="solbonk" target="_blank">SOL > $BONK</a>
+              }
+            </Stack>
+            <img src="/nfts.gif"className="nft-samples"/>
+            <Modal open={modalShowing} onClose={() => setModalShowing(false)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className={styles.nftPreview}>
+                <h1>{nft?.name}</h1>
+                <img
+                  height={500}
+                  src={nft?.json?.image || "/fallbackImage.jpg"}
+                  alt="The downloaded illustration of the provided NFT address."
+                />
+              </div>
+            </Modal>
+          </Stack>
+         
+        </CardContent>
+      </Card>
       {
         next && <div className="next-phase"><Next next={next}/></div>
       }
-    </Stack>
+    </>
   );
 };
