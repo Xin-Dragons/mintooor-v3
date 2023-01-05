@@ -9,7 +9,7 @@ import { useMetaplex } from "./useMetaplex"
 
 const candyMachines = {
   'Mitsu': '46XowcjpCxYy7PxHHkWGytQxciQrCFb6zbNTQnAi19tD',
-  'Xin': '6k5DYH6CmLwnCXCDN6QeMkJHWqe1rbqzPktKykwhVf29',
+  // 'Xin': '6k5DYH6CmLwnCXCDN6QeMkJHWqe1rbqzPktKykwhVf29',
   '$BONK': 'BhTcB1KQkTG3toW72zSYej6gw4dyLRyFJztfv6E87u2K'
 }
 
