@@ -31,8 +31,8 @@ export function App() {
       }
     }))
 
-    setTotalAvailable(totals.reduce((sum, item) => sum + item.total, 0))
-    setTotalMinted(totals.reduce((sum, item) => sum + item.actual, 0))
+    setTotalAvailable(totals.reduce((sum, item) => sum + item.total, 0) + 887)
+    setTotalMinted(totals.reduce((sum, item) => sum + item.actual, 0) + 887)
   }
 
   useEffect(() => {
