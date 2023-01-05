@@ -44,16 +44,20 @@ function ActiveGroup({ group, onExpired }) {
 
   let tokenPayment = group?.guards?.tokenPayment?.amount?.basisPoints?.toNumber();
 
-  if (tokenPayment && group?.guards?.tokenBurn) {
-    const amount = group?.guards?.tokenBurn?.amount?.basisPoints?.toNumber();
-    tokenPayment += amount;
+  if (tokenPayment) {
+    if (group?.guards?.tokenBurn) {
+      const amount = group?.guards?.tokenBurn?.amount?.basisPoints?.toNumber();
+      tokenPayment += amount;
+    }
 
-    const decimals = group.label === '$XIN' ? 6 : 5
+    const decimals = (group.label === '$XIN' || group.label === 'FFA') ? 6 : 5
+
+    console.log(decimals)
 
     tokenPayment = tokenPayment / Math.pow(10, decimals)
   }
 
-  const currency = group.label
+  const currency = group.label === 'FFA' ? '$XIN' : group.label
   
 
   return (
@@ -66,7 +70,7 @@ function ActiveGroup({ group, onExpired }) {
           )
         }
         {
-          !!(group?.label === '$XIN' && group?.guards?.tokenBurn) && (
+          !!(['$XIN', 'FFA'].includes(group?.label) && group?.guards?.tokenBurn) && (
             <Typography variant="body1"><span></span> WL token burn</Typography>
           )
         }
