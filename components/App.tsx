@@ -10,7 +10,7 @@ import { useMetaplex } from "./useMetaplex"
 const candyMachines = {
   'Mitsu': '46XowcjpCxYy7PxHHkWGytQxciQrCFb6zbNTQnAi19tD',
   // 'Xin': '6k5DYH6CmLwnCXCDN6QeMkJHWqe1rbqzPktKykwhVf29',
-  '$BONK': 'BhTcB1KQkTG3toW72zSYej6gw4dyLRyFJztfv6E87u2K'
+  // '$BONK': 'BhTcB1KQkTG3toW72zSYej6gw4dyLRyFJztfv6E87u2K'
 }
 
 export function App() {
@@ -51,13 +51,13 @@ export function App() {
       <Toaster />
       <Stack spacing={2}>
         <Typography variant="h1"><img width={192} className="logo" src="/logo.png"/></Typography>
-        <Tabs value={activeMint} className="cm-tabs">
+        {/* <Tabs value={activeMint} className="cm-tabs">
           {
             Object.keys(candyMachines).map((cm, index) => {
               return <Tab key={index} value={cm} onClick={() => setActiveMint(cm)} label={cm} />
             })
           }
-        </Tabs>
+        </Tabs> */}
         
         <MintNFTs cmId={candyMachines[activeMint] as string} totalMinted={totalMinted} totalAvailable={totalAvailable} />
       </Stack>

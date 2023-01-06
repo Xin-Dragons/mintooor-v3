@@ -192,8 +192,8 @@ function Countdown({ date, onExpired = () => {} }) {
 
 
 function MintProgress ({ candyMachine, totalMinted, totalAvailable, activeGroup }) {
-  const actual = activeGroup === '$BONK' ? totalMinted : candyMachine.itemsMinted.toString(10)
-  const total = activeGroup === '$BONK' ? totalAvailable : candyMachine.itemsAvailable.toString(10)
+  const actual = activeGroup === 'MITSU' ? totalMinted : candyMachine.itemsMinted.toString(10)
+  const total = activeGroup === 'MITSU' ? totalAvailable : candyMachine.itemsAvailable.toString(10)
   return (
     <Box>
       <Box sx={{ width: '100%' }} mt={2}>
